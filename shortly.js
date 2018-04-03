@@ -12,6 +12,12 @@ var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
 var app = express();
+var session = require('express-session');
+app.use(session({
+  secret: 'a secret',
+  resave: false,
+  saveUninitalized: true
+}))
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -23,17 +29,30 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
+
 app.get('/', 
 function(req, res) {
-  res.render('index');
+  if (req.session.username) {
+    res.render('index');
+  } else {
+    res.redirect('/login');
+  }
 });
 
-app.get('/create', 
+app.get('/login', function(req, res) {
+  res.render('login');
+})
+
+app.get('/signup', function(req, res) {
+  res.render('signup')
+})
+
+app.get('/create', util.checkUser,
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links', util.checkUser,
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.status(200).send(links.models);
