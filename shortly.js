@@ -94,7 +94,34 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.post('/login', function (req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
 
+  new User({ username: username })
+    .fetch()
+    .then(function (user) {
+      if (!user) {
+        res.redirect('/login');
+      } else {
+      bcrypt.compare(password, user.get('password'), function(err, match) {
+        if (match) {
+          util.createSession(req, res, user);
+        } else {
+          res.redirect('/login');
+        }
+        
+});
+
+app.get('/logout', function (req, res) {
+  req.session.destroy(function () {
+    res.redirect('/login');
+  });
+});
+
+app.get('/signup', function (req, res) {
+  res.render('signup');
+});
 
 
 /************************************************************/
